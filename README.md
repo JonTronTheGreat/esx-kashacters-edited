@@ -1,5 +1,5 @@
 # esx-kashacters-bgl
-Esx_Kashacters - Edited To Have A Welcome Screen And Changelog, Was Stolen And Sold Online So Released For Public Use :)
+Esx_Kashacters - Edited To Have A Welcome Screen And Changelog, Released For Public Use :)
 
 My Version Edited By Me - Do What Ever You Wish :P
 
