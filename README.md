@@ -1,4 +1,4 @@
-# esx-kashacters-bgl
+# esx-kashacters-Edited
 Esx_Kashacters - Edited To Have A Welcome Screen And Changelog, Released For Public Use :)
 
 My Version Edited By Me - Do What Ever You Wish :P
