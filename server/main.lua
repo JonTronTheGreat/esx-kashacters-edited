@@ -1,7 +1,3 @@
-
-ESX = nil
-
-TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 ---------------------------------------------------------------------------------------
 -- Edit this table to all the database tables and columns
 -- where identifiers are used (such as users, owned_vehicles, owned_properties etc.)
@@ -35,39 +31,18 @@ AddEventHandler('kashactersS:SetupCharacters', function()
 end)
 
 RegisterServerEvent("kashactersS:CharacterChosen")
-AddEventHandler('kashactersS:CharacterChosen', function(charid, ischar, spawnid)
-	local spid = spawnid
+AddEventHandler('kashactersS:CharacterChosen', function(charid, ischar)
     local src = source
     local spawn = {}
     SetLastCharacter(src, tonumber(charid))
     SetCharToIdentifier(GetPlayerIdentifiers(src)[1], tonumber(charid))
     if ischar == "true" then
-    
-        if spid=="1" then
-			spawn = GetSpawnPos(src)
-        elseif spid=="2" then
-            --Stab city
-            spawn = { x = 198.79, y = -934.32, z = 30.68 }
-        elseif spid=="3" then
-            --Sandy Shores
-            spawn = { x = 1556.18, y = 3609.20, z = 35.43 }
-        elseif spid=="4" then
-            --paleto
-            spawn = { x = -687.73, y = 5768.60, z = 17.33 }
-        else
-            spawn = GetSpawnPos(src)
-        end
-		if spawn.x == nil then
-			print("spawn its nill setting default")
-			spawn = { x = -1045.42, y = -2750.85, z = 22.31 }
-		end
-		TriggerClientEvent("kashactersC:SpawnCharacter", src, spawn)
-    else --default spawn mode
-
-		
-        spawn = { x = -1045.42, y = -2750.85, z = 22.31 } -- DEFAULT SPAWN POSITION -- EDIT THIS
-		TriggerClientEvent("kashactersC:SpawnCharacter", src, spawn,true)
+        spawn = GetSpawnPos(src)
+    else
+		TriggerClientEvent('skinchanger:loadDefaultModel', src, true, cb)
+        spawn = { x = 195.55, y = -933.36, z = 29.90 } -- DEFAULT SPAWN POSITION
     end
+    TriggerClientEvent("kashactersC:SpawnCharacter", src, spawn)
 end)
 
 RegisterServerEvent("kashactersS:DeleteCharacter")
@@ -78,9 +53,15 @@ AddEventHandler('kashactersS:DeleteCharacter', function(charid)
 end)
 
 function GetPlayerCharacters(source)
-    local identifier = GetIdentifierWithoutSteam(GetPlayerIdentifiers(source)[1])
-    local Chars = MySQLAsyncExecute("SELECT * FROM `users` WHERE identifier LIKE '%"..identifier.."%'")
-    return Chars
+  local identifier = GetIdentifierWithoutSteam(GetPlayerIdentifiers(source)[1])
+  local Chars = MySQLAsyncExecute("SELECT * FROM `users` WHERE identifier LIKE '%"..identifier.."%'")
+  for i = 1, #Chars, 1 do
+    charJob = MySQLAsyncExecute("SELECT * FROM `jobs` WHERE `name` = '"..Chars[i].job.."'")
+    charJobgrade = MySQLAsyncExecute("SELECT * FROM `job_grades` WHERE `grade` = '"..Chars[i].job_grade.."'")
+    Chars[i].job = charJob[1].label
+    Chars[i].job_grade = charJobgrade[1].label
+  end
+  return Chars
 end
 
 function GetLastCharacter(source)
@@ -91,6 +72,10 @@ function GetLastCharacter(source)
         MySQLAsyncExecute("INSERT INTO `user_lastcharacter` (`steamid`, `charid`) VALUES('"..GetPlayerIdentifiers(source)[1].."', 1)")
         return 1
     end
+end
+
+function SetLastCharacter(source, charid)
+    MySQLAsyncExecute("UPDATE `user_lastcharacter` SET `charid` = '"..charid.."' WHERE `steamid` = '"..GetPlayerIdentifiers(source)[1].."'")
 end
 
 function SetLastCharacter(source, charid)
@@ -117,13 +102,9 @@ end
 
 function GetSpawnPos(source)
     local SpawnPos = MySQLAsyncExecute("SELECT `position` FROM `users` WHERE `identifier` = '"..GetPlayerIdentifiers(source)[1].."'")
-	if SpawnPos[1].position ~= nil then
-		return json.decode(SpawnPos[1].position)
-	else
-		local spawn = { x = -1045.42, y = -2750.85, z = 22.31 }
-		return spawn
-	end
+    return json.decode(SpawnPos[1].position)
 end
+
 
 function GetIdentifierWithoutSteam(Identifier)
     return string.gsub(Identifier, "steam", "")
